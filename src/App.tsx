@@ -4,6 +4,8 @@ import { Play, Save, Download, Trash2 } from 'lucide-react'
 import RouletteWheel, { RouletteWheelRef } from './components/RouletteWheel'
 import ItemManager from './components/ItemManager'
 import SettingsPanel from './components/SettingsPanel'
+import SavePresetModal from './components/SavePresetModal'
+import LoadPresetModal from './components/LoadPresetModal'
 import { useLocalStorage } from './hooks/useLocalStorage'
 import { playStartSound, playTickSound } from './utils/audio'
 
@@ -26,6 +28,8 @@ function App() {
   })
   const [isSpinning, setIsSpinning] = useState(false)
   const [lastWinners, setLastWinners] = useState<number[]>([])
+  const [isSaveModalOpen, setIsSaveModalOpen] = useState(false)
+  const [isLoadModalOpen, setIsLoadModalOpen] = useState(false)
 
   const wheelRef = useRef<RouletteWheelRef>(null)
 
@@ -105,37 +109,32 @@ function App() {
   }
 
   const savePreset = () => {
-    const name = prompt('Nome do preset:')
-    if (!name) return
+    setIsSaveModalOpen(true)
+  }
 
+  const handleSavePreset = (name: string) => {
     localStorage.setItem(`poh_preset_${name}`, JSON.stringify(items))
-    alert(`Preset "${name}" salvo com sucesso!`)
   }
 
   const loadPreset = () => {
-    const keys = Object.keys(localStorage).filter(key => key.startsWith('poh_preset_'))
-    if (keys.length === 0) {
-      alert('Nenhum preset encontrado!')
-      return
-    }
+    setIsLoadModalOpen(true)
+  }
 
-    const presetNames = keys.map(key => key.replace('poh_preset_', ''))
-    const name = prompt(`Presets disponíveis:\n${presetNames.join('\n')}\n\nDigite o nome do preset:`)
-    if (!name) return
-
+  const handleLoadPreset = (name: string) => {
     const presetData = localStorage.getItem(`poh_preset_${name}`)
-    if (!presetData) {
-      alert('Preset não encontrado!')
-      return
+    if (presetData) {
+      try {
+        const loadedItems = JSON.parse(presetData)
+        setItems(loadedItems)
+        setLastWinners([]) // Limpa histórico para novo conjunto
+      } catch {
+        alert('Erro ao carregar preset!')
+      }
     }
+  }
 
-    try {
-      const loadedItems = JSON.parse(presetData)
-      setItems(loadedItems)
-      alert(`Preset "${name}" carregado com sucesso!`)
-    } catch {
-      alert('Erro ao carregar preset!')
-    }
+  const handleDeletePreset = (name: string) => {
+    localStorage.removeItem(`poh_preset_${name}`)
   }
 
   const loadLunchPreset = () => {
@@ -260,6 +259,20 @@ function App() {
           </motion.div>
         </div>
       </div>
+
+      {/* Modals */}
+      <SavePresetModal
+        isOpen={isSaveModalOpen}
+        onClose={() => setIsSaveModalOpen(false)}
+        onSave={handleSavePreset}
+      />
+      
+      <LoadPresetModal
+        isOpen={isLoadModalOpen}
+        onClose={() => setIsLoadModalOpen(false)}
+        onLoad={handleLoadPreset}
+        onDelete={handleDeletePreset}
+      />
     </div>
   )
 }
