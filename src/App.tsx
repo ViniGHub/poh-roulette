@@ -254,7 +254,6 @@ function App() {
             <RouletteWheel
               ref={wheelRef}
               items={items}
-              isSpinning={isSpinning}
               settings={settings}
               onTick={() => settings.soundEnabled && playTickSound()}
             />

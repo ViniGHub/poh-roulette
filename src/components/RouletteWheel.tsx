@@ -4,7 +4,6 @@ import type { RouletteItem, RouletteSettings } from '../App'
 
 interface RouletteWheelProps {
   items: RouletteItem[]
-  isSpinning: boolean
   settings: RouletteSettings
   onTick?: () => void
 }
@@ -15,7 +14,7 @@ export interface RouletteWheelRef {
 }
 
 const RouletteWheel = forwardRef<RouletteWheelRef, RouletteWheelProps>(
-  ({ items, isSpinning, settings, onTick }, ref) => {
+  ({ items, settings, onTick }, ref) => {
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const rotationRef = useRef(0)
     const animationRef = useRef<number>()
